@@ -7,8 +7,8 @@ from grid import build_sensitivity_map
 from privacy import get_dynamic_epsilon
 from privacy import add_laplace_noise
 
-from evaluation import calculate_mae
-from evaluation import calculate_rmse
+from src.evaluation.evaluation import calculate_mae
+from src.evaluation.evaluation import calculate_rmse
 
 from visualization import plot_trajectory
 

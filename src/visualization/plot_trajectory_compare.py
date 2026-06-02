@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 
 from src.experiment import file_path
 from trajectory_loader import load_geolife_trajectory
-from fixed_dp import laplace_noise
+from src.methods.fixed_dp import laplace_noise
 from gapbm import gapbm_perturb
 
 from pathlib import Path
 
-Path("../figures").mkdir(
+Path("../../figures").mkdir(
     exist_ok=True
 )
 

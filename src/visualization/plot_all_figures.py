@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 
-RESULT_DIR = Path("../results")
-FIG_DIR = Path("../figures")
+RESULT_DIR = Path("../../results")
+FIG_DIR = Path("../../figures")
 
 FIG_DIR.mkdir(exist_ok=True)
 
