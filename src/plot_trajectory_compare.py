@@ -1,27 +1,21 @@
+import axes
 import matplotlib.pyplot as plt
 
-from src.epsilon_visualization import epsilon_max
+from src.experiment import file_path
 from trajectory_loader import load_geolife_trajectory
 from fixed_dp import laplace_noise
 from gapbm import gapbm_perturb
 
-# ==========================
-# 1. 读取GeoLife轨迹
-# ==========================
+from pathlib import Path
 
-file_path = r"../data/raw/Geolife Trajectories 1.3/Data/000/Trajectory/20081023025304.plt"
+Path("../figures").mkdir(
+    exist_ok=True
+)
 
-x, y = load_geolife_trajectory(file_path)
-
-# 为了图更清晰
-# 先取前1000个点
-
-x = x[:1000]
-y = y[:1000]
-
-# ==========================
-# 2. Fixed DP
-# ==========================
+x, y = load_geolife_trajectory(
+    file_path,
+    max_points=1000
+)
 
 epsilon = 3
 
@@ -35,15 +29,17 @@ y_fixed = [
     for v in y
 ]
 
-# ==========================
-# 3. GAPBM
-# ==========================
-
 x_gapbm, y_gapbm, epsilon_list = gapbm_perturb(
     x,
     y,
-    epsilon
+    epsilon_max=epsilon
 )
+
+for ax in axes:
+    ax.set_aspect(
+        "equal",
+        adjustable="box"
+    )
 
 # ==========================
 # 4. 绘制SCI风格三联图
