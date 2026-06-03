@@ -41,41 +41,75 @@ def load_plt_file(filepath: str) -> pd.DataFrame:
         return pd.DataFrame(columns=["lat", "lon"])
 
 
-def load_geolife_data(data_dir: str, max_users: int = 10, max_files_per_user: int = 5) -> pd.DataFrame:
+def load_geolife_data(data_dir: str, max_users: int = 3, max_files_per_user: int = 2) -> pd.DataFrame:
     """
     批量加载 GeoLife 数据集
     data_dir: GeoLife Data/ 目录路径
     """
+    import os, itertools, gc
     data_path = Path(data_dir)
     all_points = []
+    total_points = 0
+    MAX_TOTAL_POINTS = 20000  # 内存限制
 
     if not data_path.exists():
         print(f"[警告] 数据目录不存在: {data_dir}，将使用模拟数据")
         return generate_synthetic_geolife_data()
 
-    user_dirs = sorted([d for d in data_path.iterdir() if d.is_dir()])[:max_users]
-    if not user_dirs:
+    # 使用 os.scandir 避免全量 sorted()
+    try:
+        user_entries = []
+        with os.scandir(str(data_path)) as it:
+            for entry in it:
+                if entry.is_dir():
+                    user_entries.append(entry.path)
+                    if len(user_entries) >= max_users:
+                        break
+    except Exception as e:
+        print(f"[警告] 读取目录失败: {e}，将使用模拟数据")
+        return generate_synthetic_geolife_data()
+
+    if not user_entries:
         print("[警告] 未找到用户目录，将使用模拟数据")
         return generate_synthetic_geolife_data()
 
-    print(f"[信息] 正在加载 {len(user_dirs)} 个用户的轨迹数据...")
-    for user_dir in tqdm(user_dirs, desc="加载用户数据"):
-        traj_dir = user_dir / "Trajectory"
+    print(f"[信息] 正在加载 {len(user_entries)} 个用户的轨迹数据 (最多 {MAX_TOTAL_POINTS} 点)...")
+    for user_path in user_entries:
+        if total_points >= MAX_TOTAL_POINTS:
+            break
+        traj_dir = Path(user_path) / "Trajectory"
         if not traj_dir.exists():
             continue
-        plt_files = sorted(traj_dir.glob("*.plt"))[:max_files_per_user]
-        for plt_file in plt_files:
-            df = load_plt_file(str(plt_file))
+        # 用 scandir 取前 N 个 plt 文件
+        plt_files = []
+        try:
+            with os.scandir(str(traj_dir)) as it:
+                for entry in it:
+                    if entry.name.endswith(".plt"):
+                        plt_files.append(entry.path)
+                        if len(plt_files) >= max_files_per_user:
+                            break
+        except Exception:
+            continue
+
+        for plt_path in plt_files:
+            if total_points >= MAX_TOTAL_POINTS:
+                break
+            df = load_plt_file(plt_path)
             if not df.empty:
-                all_points.append(df)
+                df = filter_beijing_region(df)
+                if not df.empty:
+                    all_points.append(df)
+                    total_points += len(df)
+            del df
+            gc.collect()
+        print(f"  用户 {Path(user_path).name}: 累计 {total_points} 点")
 
     if not all_points:
         print("[警告] 未加载到有效数据，将使用模拟数据")
         return generate_synthetic_geolife_data()
 
     result = pd.concat(all_points, ignore_index=True)
-    # 过滤北京区域
-    result = filter_beijing_region(result)
     print(f"[信息] 共加载 {len(result)} 个轨迹点（北京区域）")
     return result
 
