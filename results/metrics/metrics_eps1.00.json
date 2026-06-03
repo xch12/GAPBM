@@ -1,0 +1,31 @@
+{
+  "epsilon": 1.0,
+  "results": {
+    "GAPBM": {
+      "MAE(°)": 0.10763,
+      "RMSE(°)": 0.123591,
+      "MeanDist(m)": 15353.12,
+      "MaxDist(m)": 29382.24,
+      "TLR": 307.4763,
+      "DDA(°)": 89.4106,
+      "MSDR(°)": 0.174784,
+      "KL_Div": 23.338544,
+      "Heatmap_Corr": -0.015691,
+      "SensZone_Err": 0.174683,
+      "NonSensZone_Err": 0.160355
+    },
+    "FixedDP": {
+      "MAE(°)": 0.101071,
+      "RMSE(°)": 0.118045,
+      "MeanDist(m)": 14548.69,
+      "MaxDist(m)": 29382.24,
+      "TLR": 296.4929,
+      "DDA(°)": 89.1974,
+      "MSDR(°)": 0.166941,
+      "KL_Div": 21.891541,
+      "Heatmap_Corr": -0.018658,
+      "SensZone_Err": 0.154055,
+      "NonSensZone_Err": 0.155576
+    }
+  }
+}
